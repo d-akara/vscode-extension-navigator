@@ -2,6 +2,14 @@
 import * as vscode from 'vscode';
 import * as edit from 'vscode-extension-common'
 
+/**
+ * - support custom tree views / palette lists
+ * - custom highlighting
+ *   - duplicate lines or possibly show in palette and you can jump to them?
+ * 
+ */
+
+
 export function activate(context: vscode.ExtensionContext) {
     let disposable = vscode.commands.registerCommand('navigator.fixedSpaceUp', () => {
         Array.from(Array(5).keys()).forEach(() => vscode.commands.executeCommand("cursorUp"));
@@ -13,6 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
     context.subscriptions.push(disposable);
 
+    // move right until end of line
     disposable = vscode.commands.registerCommand('navigator.wordRightEnd', () => {
         const textEditor = vscode.window.activeTextEditor;
         const selection = textEditor.selection;
@@ -22,6 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
     context.subscriptions.push(disposable);
 
+    // move left until begin of line
     disposable = vscode.commands.registerCommand('navigator.wordLeftBegin', () => {
         const textEditor = vscode.window.activeTextEditor;
         const selection = textEditor.selection;

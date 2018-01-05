@@ -18,28 +18,60 @@
         "onCommand:navigator.fixedSpaceUp",
         "onCommand:navigator.fixedSpaceDown",
         "onCommand:navigator.wordRightEnd",
-        "onCommand:navigator.wordLeftBegin"
+        "onCommand:navigator.wordLeftBegin",
+        "onCommand:navigator.view.save.matches",
+        "onView:options"
     ],
     "main": "./out/src/extension",
     "contributes": {
         "commands": [
             {
                 "command": "navigator.fixedSpaceUp",
-                "title": "Navigator: Cursor jump fixed space up"
+                "title": "Cursor jump fixed space up",
+                "category": "Navigator"
             },
             {
                 "command": "navigator.fixedSpaceDown",
-                "title": "Navigator: Cursor jump fixed space down"
+                "title": "Cursor jump fixed space down",
+                "category": "Navigator"
             },
             {
                 "command": "navigator.wordRightEnd",
-                "title": "Navigator: Cursor word right until end"
+                "title": "Cursor word right until end",
+                "category": "Navigator"
             },
             {
                 "command": "navigator.wordLeftBegin",
-                "title": "Navigator: Cursor word left until begin"
+                "title": "Cursor word left until begin",
+                "category": "Navigator"
+            },
+            {
+                "command": "navigator.view.save.matches",
+                "title": "show current find matches",
+                "category": "Navigator View",
+                "icon": {
+                    "light": "icons/light/set.svg",
+                    "dark": "icons/dark/set.svg"
+                }
             }
-        ]
+        ],
+        "views": {
+            "explorer": [
+                {
+                    "id": "navigation",
+                    "name": "Navigator"
+                }
+            ]
+        },
+        "menus": {
+            "view/title": [
+                {
+                    "command": "navigator.view.save.matches",
+                    "when": "view == navigation",
+                    "group": "navigation"
+                }
+            ]
+        }
     },
     "scripts": {
         "__vscode:prepublish": "tsc -p ./",

@@ -1,10 +1,13 @@
 'use strict';
 import * as vscode from 'vscode';
-import * as edit from 'vscode-extension-common'
+import {Region} from 'vscode-extension-common'
 
 /**
  * - support custom tree views / palette lists
  * - recent edit locations in tree view
+ * - all find matches/highlights in tree view
+ * - all matching word under cursor
+ * - all parent lines of current
  * - custom highlighting
  *   - duplicate lines or possibly show in palette and you can jump to them?
  * 
@@ -71,7 +74,7 @@ function registerTreeDataProvider(context: vscode.ExtensionContext) {
     let disposable = vscode.window.registerTreeDataProvider('navigation', provider)
     context.subscriptions.push(disposable);
     disposable = vscode.commands.registerCommand('navigator.view.save.matches', () => {
-        edit.matchesAsSelections(vscode.window.activeTextEditor)
+        Region.matchesAsSelections(vscode.window.activeTextEditor)
         .then(selections=> {
            selected = selections;
            emitter.fire()

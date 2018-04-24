@@ -13,6 +13,7 @@ import {Region} from 'vscode-extension-common'
  * 
  */
 
+const iconPaths = new Map<string, string>()
 
 export function activate(context: vscode.ExtensionContext) {
     let disposable = vscode.commands.registerCommand('navigator.fixedSpaceUp', () => {
@@ -60,14 +61,7 @@ function registerTreeDataProvider(context: vscode.ExtensionContext) {
         },
         getTreeItem: element=> {
             const selection = element as vscode.Selection;
-            return {
-                label: selection.anchor.line + ' - ' + vscode.window.activeTextEditor.document.lineAt(selection.anchor.line).text,
-                command: {title: 'reveal', command: 'revealLine', arguments: [{lineNumber:selection.anchor.line}]},
-                iconPath: {
-                    light: context.asAbsolutePath('icons/light/location.svg'),
-                    dark: context.asAbsolutePath('icons/dark/location.svg')
-                }
-            }
+            return makeTreeItemFromSelection(selection)
         }
     }
     console.log('registering tree data')
@@ -82,6 +76,32 @@ function registerTreeDataProvider(context: vscode.ExtensionContext) {
     });
     context.subscriptions.push(disposable);    
 }
+
+function registerIcons(context: vscode.ExtensionContext) {
+    iconPaths.set('selection.light', context.asAbsolutePath('icons/light/location.svg'))
+    iconPaths.set('selection.dark',  context.asAbsolutePath('icons/dark/location.svg'))
+}
+
+function makeIconPath(iconId:string) {
+    return {
+        light: iconPaths.get(iconId + '.light'),
+        dark: iconPaths.get(iconId + '.dark')
+    }
+}
+
+export interface TreeItemActionable extends vscode.TreeItem {
+    children?: TreeItemActionable[] | (()=>Thenable<TreeItemActionable[]>)
+}
+
+
+export function makeTreeItemFromSelection(selection: vscode.Selection) {
+    return {
+        label: selection.anchor.line + ' - ' + vscode.window.activeTextEditor.document.lineAt(selection.anchor.line).text,
+        command: {title: 'reveal', command: 'revealLine', arguments: [{lineNumber:selection.anchor.line}]},
+        iconPath: makeIconPath('selection')
+    }
+}
+
 
 export function deactivate() {
 }

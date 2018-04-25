@@ -48,9 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
     context.subscriptions.push(disposable);
 
-    const treeItemRoot: TreeItemActionable = {
-        label: 'root'
-    }
+    const treeItemRoot: TreeItemRoot = {}
 
     const emitter = registerTreeDataProvider(context, treeItemRoot);
 
@@ -103,10 +101,10 @@ function makeIconPath(iconId:string) {
     }
 }
 
-export interface TreeItemActionable extends vscode.TreeItem {
-    children?: TreeItemActionable[] | (()=>Thenable<TreeItemActionable[]>)
+export interface TreeItemRoot extends TreeWithChildren {
 }
-
+export type TreeWithChildren = {children?: TreeItemActionable[] | (()=>Thenable<TreeItemActionable[]>)}
+export type TreeItemActionable = TreeWithChildren & vscode.TreeItem
 
 export function makeTreeItemFromSelection(selection: vscode.Selection) {
     return {

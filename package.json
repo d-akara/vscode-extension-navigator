@@ -20,7 +20,7 @@
         "onCommand:navigator.wordRightEnd",
         "onCommand:navigator.wordLeftBegin",
         "onCommand:navigator.view.save.matches",
-        "onView:options"
+        "onView:navigation"
     ],
     "main": "./out/src/extension",
     "contributes": {

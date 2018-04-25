@@ -16,6 +16,8 @@ import {Region} from 'vscode-extension-common'
 const iconPaths = new Map<string, string>()
 
 export function activate(context: vscode.ExtensionContext) {
+    registerIcons(context)
+
     let disposable = vscode.commands.registerCommand('navigator.fixedSpaceUp', () => {
         Array.from(Array(5).keys()).forEach(() => vscode.commands.executeCommand("cursorUp"));
     });
@@ -46,35 +48,47 @@ export function activate(context: vscode.ExtensionContext) {
     });
     context.subscriptions.push(disposable);
 
-    registerTreeDataProvider(context);
+    const treeItemRoot: TreeItemActionable = {
+        label: 'root'
+    }
 
+    const emitter = registerTreeDataProvider(context, treeItemRoot);
+
+    disposable = vscode.commands.registerCommand('navigator.view.save.matches', () => {
+        Region.matchesAsSelections(vscode.window.activeTextEditor)
+        .then(selections=> {
+            treeItemRoot.children = selections.map(selection => makeTreeItemFromSelection(selection))
+            emitter.fire( )
+        })
+    });
+    context.subscriptions.push(disposable);
 }
 
-function registerTreeDataProvider(context: vscode.ExtensionContext) {
+function registerTreeDataProvider(context: vscode.ExtensionContext, rootTreeItem: TreeItemActionable) {
     let selected;
     const emitter = new vscode.EventEmitter<string | null>();
     const provider = {
         onDidChangeTreeData: emitter.event,
         getChildren: element=> {
-            console.log('getting current selections')
-            return Promise.resolve(selected);
+            const treeItemActionable = element as TreeItemActionable
+            let children = rootTreeItem.children;
+            if (element)
+                children = treeItemActionable.children
+            console.log('getting current selections' + children)
+            if (!children) return;
+
+            if (children instanceof Function)
+                return Promise.resolve(children())
+            else 
+                return Promise.resolve(children)
         },
-        getTreeItem: element=> {
-            const selection = element as vscode.Selection;
-            return makeTreeItemFromSelection(selection)
-        }
+        getTreeItem: treeItem => treeItem
     }
     console.log('registering tree data')
     let disposable = vscode.window.registerTreeDataProvider('navigation', provider)
     context.subscriptions.push(disposable);
-    disposable = vscode.commands.registerCommand('navigator.view.save.matches', () => {
-        Region.matchesAsSelections(vscode.window.activeTextEditor)
-        .then(selections=> {
-           selected = selections;
-           emitter.fire()
-        })
-    });
-    context.subscriptions.push(disposable);    
+
+    return emitter;
 }
 
 function registerIcons(context: vscode.ExtensionContext) {

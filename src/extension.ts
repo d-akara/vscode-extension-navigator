@@ -1,6 +1,6 @@
 'use strict';
 import * as vscode from 'vscode';
-import {Region} from 'vscode-extension-common'
+import {Region, View} from 'vscode-extension-common'
 
 /**
  * - support custom tree views / palette lists
@@ -48,45 +48,18 @@ export function activate(context: vscode.ExtensionContext) {
     });
     context.subscriptions.push(disposable);
 
-    const treeItemRoot: TreeItemRoot = {}
+    const treeItemRoot: View.TreeItemRoot = {}
 
-    const emitter = registerTreeDataProvider(context, treeItemRoot);
+    const treeView = View.makeTreeView(context, 'navigation', treeItemRoot);
 
     disposable = vscode.commands.registerCommand('navigator.view.save.matches', () => {
         Region.matchesAsSelections(vscode.window.activeTextEditor)
         .then(selections=> {
             treeItemRoot.children = selections.map(selection => makeTreeItemFromSelection(selection))
-            emitter.fire( )
+            treeView.update()
         })
     });
     context.subscriptions.push(disposable);
-}
-
-function registerTreeDataProvider(context: vscode.ExtensionContext, rootTreeItem: TreeItemActionable) {
-    let selected;
-    const emitter = new vscode.EventEmitter<string | null>();
-    const provider = {
-        onDidChangeTreeData: emitter.event,
-        getChildren: element=> {
-            const treeItemActionable = element as TreeItemActionable
-            let children = rootTreeItem.children;
-            if (element)
-                children = treeItemActionable.children
-            console.log('getting current selections' + children)
-            if (!children) return;
-
-            if (children instanceof Function)
-                return Promise.resolve(children())
-            else 
-                return Promise.resolve(children)
-        },
-        getTreeItem: treeItem => treeItem
-    }
-    console.log('registering tree data')
-    let disposable = vscode.window.registerTreeDataProvider('navigation', provider)
-    context.subscriptions.push(disposable);
-
-    return emitter;
 }
 
 function registerIcons(context: vscode.ExtensionContext) {
@@ -100,11 +73,6 @@ function makeIconPath(iconId:string) {
         dark: iconPaths.get(iconId + '.dark')
     }
 }
-
-export interface TreeItemRoot extends TreeWithChildren {
-}
-export type TreeWithChildren = {children?: TreeItemActionable[] | (()=>Thenable<TreeItemActionable[]>)}
-export type TreeItemActionable = TreeWithChildren & vscode.TreeItem
 
 export function makeTreeItemFromSelection(selection: vscode.Selection) {
     return {

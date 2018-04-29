@@ -76,6 +76,7 @@
     "scripts": {
         "__vscode:prepublish": "tsc -p ./",
         "compile": "tsc -watch -p ./",
+        "compile_common": "tsc -watch -p ../vscode-extension-common",
         "postinstall": "node ./node_modules/vscode/bin/install",
         "test": "node ./node_modules/vscode/bin/test"
     },
@@ -84,7 +85,7 @@
         "@types/node": "^6.0.106",
         "mocha": "^2.3.3",
         "typescript": "^2.8.3",
-        "vscode": "^1.1.14"
+        "vscode": "^1.1.16"
     },
     "dependencies": {
         "vscode-extension-common": "file:../vscode-extension-common"

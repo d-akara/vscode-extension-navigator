@@ -48,15 +48,13 @@ export function activate(context: vscode.ExtensionContext) {
     });
     context.subscriptions.push(disposable);
 
-    const treeItemRoot: View.TreeItemRoot = {}
-
-    const treeView = View.makeTreeView(context, 'navigation', treeItemRoot);
+    const treeManager = View.makeTreeViewManager(context, 'navigation');
 
     disposable = vscode.commands.registerCommand('navigator.view.save.matches', () => {
         Region.matchesAsSelections(vscode.window.activeTextEditor)
         .then(selections=> {
-            treeItemRoot.children = selections.map(selection => makeTreeItemFromSelection(selection))
-            treeView.update()
+            treeManager.rootTreeItem.children = selections.map(selection => makeTreeItemFromSelection(selection))
+            treeManager.update()
         })
     });
     context.subscriptions.push(disposable);

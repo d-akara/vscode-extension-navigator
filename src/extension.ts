@@ -13,10 +13,8 @@ import {Region, View} from 'vscode-extension-common'
  * 
  */
 
-const iconPaths = new Map<string, string>()
-
 export function activate(context: vscode.ExtensionContext) {
-    registerIcons(context)
+    View.registerIcons(context, 'icons')
 
     let disposable = vscode.commands.registerCommand('navigator.fixedSpaceUp', () => {
         Array.from(Array(5).keys()).forEach(() => vscode.commands.executeCommand("cursorUp"));
@@ -60,26 +58,23 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(disposable);
 }
 
-function registerIcons(context: vscode.ExtensionContext) {
-    iconPaths.set('selection.light', context.asAbsolutePath('icons/light/location.svg'))
-    iconPaths.set('selection.dark',  context.asAbsolutePath('icons/dark/location.svg'))
-}
-
-function makeIconPath(iconId:string) {
-    return {
-        light: iconPaths.get(iconId + '.light'),
-        dark: iconPaths.get(iconId + '.dark')
-    }
-}
-
 export function makeTreeItemFromSelection(selection: vscode.Selection) {
     return {
-        label: selection.anchor.line + ' - ' + vscode.window.activeTextEditor.document.lineAt(selection.anchor.line).text,
+        label:  selection.anchor.line + ` ${Glyph.TRIANGLE_RIGHT_SMALL} ` + vscode.window.activeTextEditor.document.lineAt(selection.anchor.line).text,
         command: {title: 'reveal', command: 'revealLine', arguments: [{lineNumber:selection.anchor.line}]},
-        iconPath: makeIconPath('selection')
+        //iconPath: View.makeIconPaths('location')
     }
 }
 
+namespace Glyph {
+    export const ARROW_RIGHT = '\u{279c}'
+    export const CIRLCE_SOLID = '\u{2b24}'
+    export const CIRLCE_DOTTED = '\u{25cc}'
+    export const SQUARE_SOLID = '\u2b1c'
+    export const HEXAGON_SOLID = '\u{2b23}'
+    export const TRIANGLE_RIGHT_SMALL = '\u{25b9}'
+    export const CIRCLE_MODIFY = '\u{20dd}' 
+}
 
 export function deactivate() {
 }

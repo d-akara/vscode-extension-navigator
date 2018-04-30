@@ -50,8 +50,8 @@
                 "title": "show current find matches",
                 "category": "Navigator View",
                 "icon": {
-                    "light": "icons/light/set.svg",
-                    "dark": "icons/dark/set.svg"
+                    "light": "icons/light/refresh.svg",
+                    "dark": "icons/dark/refresh.svg"
                 }
             }
         ],

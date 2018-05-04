@@ -7,7 +7,7 @@ _Currently this is mostly a personal project, but might expand later to somethin
 ## Provided Features
 - Tree view to show current find matches
   - use command `Show current find matches in view`
-  - clicking matches in tree view will reveal that line in the document
+  - clicking matches in tree view will reveal that line in the document ![ScreenShot](doc-images/FindMatches.png)
 - `Cursor word right until end`  command to skip words, but stop at end of line
 - `Cursor word left until begin` command to skip words, but stop at beginning of line
 - `Cursor jump fixed space up`   command to skip 5 vertical spaces at a time

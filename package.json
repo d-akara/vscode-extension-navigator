@@ -2,7 +2,7 @@
     "name": "dakara-navigator",
     "displayName": "Navigator",
     "description": "Enhanced cursor navigation and movement.",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "repository": {
         "type": "git",
         "url": "https://github.com/dakaraphi/vscode-extension-navigator"
@@ -47,7 +47,7 @@
             },
             {
                 "command": "navigator.view.save.matches",
-                "title": "show current find matches",
+                "title": "Show current find matches in view",
                 "category": "Navigator View",
                 "icon": {
                     "light": "icons/light/refresh.svg",

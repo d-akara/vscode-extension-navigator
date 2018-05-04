@@ -1,6 +1,6 @@
 'use strict';
 import * as vscode from 'vscode';
-import {Region, View} from 'vscode-extension-common'
+import {Region, Lines, View} from 'vscode-extension-common'
 
 /**
  * - support custom tree views / palette lists
@@ -46,34 +46,43 @@ export function activate(context: vscode.ExtensionContext) {
     });
     context.subscriptions.push(disposable);
 
-    const treeManager = View.makeTreeViewManager(context, 'navigation');
+    const matchesLabel = `${Glyph.SEARCH} Matches`
+    const treeManager = View.makeTreeViewManager(context, 'navigation', {children:[{id:'matches', label:matchesLabel, collapsibleState: vscode.TreeItemCollapsibleState.Collapsed}]});
 
     disposable = vscode.commands.registerCommand('navigator.view.save.matches', () => {
         Region.matchesAsSelections(vscode.window.activeTextEditor)
         .then(selections=> {
-            treeManager.rootTreeItem.children = selections.map(selection => makeTreeItemFromSelection(selection))
+            const matchesNode = treeManager.findTreeItem(item => item.id === 'matches')
+            matchesNode.label = matchesLabel + ` ${Glyph.TRI_DOT_HORIZONTAL} ` + vscode.window.activeTextEditor.document.getText(selections[0])
+            let lines = Lines.linesFromRanges(vscode.window.activeTextEditor.document, selections)
+            lines = lines.sort((l1, l2) => l1.lineNumber - l2.lineNumber)
+            matchesNode.children = lines.map(line => makeTreeItemFromSelection(line))
             treeManager.update()
         })
     });
     context.subscriptions.push(disposable);
 }
 
-export function makeTreeItemFromSelection(selection: vscode.Selection) {
+export function makeTreeItemFromSelection(line: vscode.TextLine) {
     return {
-        label:  selection.anchor.line + ` ${Glyph.TRIANGLE_RIGHT_SMALL} ` + vscode.window.activeTextEditor.document.lineAt(selection.anchor.line).text,
-        command: {title: 'reveal', command: 'revealLine', arguments: [{lineNumber:selection.anchor.line}]},
+        label:  (line.lineNumber + 1) + ` ${Glyph.TRI_DOT_VERTICAL} ` + line.text,
+        command: {title: 'reveal', command: 'revealLine', arguments: [{lineNumber:line.lineNumber}]},
         //iconPath: View.makeIconPaths('location')
     }
 }
 
 namespace Glyph {
-    export const ARROW_RIGHT = '\u{279c}'
-    export const CIRLCE_SOLID = '\u{2b24}'
-    export const CIRLCE_DOTTED = '\u{25cc}'
-    export const SQUARE_SOLID = '\u2b1c'
-    export const HEXAGON_SOLID = '\u{2b23}'
-    export const TRIANGLE_RIGHT_SMALL = '\u{25b9}'
     export const CIRCLE_MODIFY = '\u{20dd}' 
+    export const DOUBLE_TRIPLE_DASH = '\u{2637}'
+    export const CIRCLE_DOT = '\u{2609}'
+    export const CIRCLE_LARGE_DOT = '\u{25C9}'
+    export const GEAR = '\u{2699}'
+    export const TRI_DOT = '\u{2234}'
+    export const TRI_DOT_VERTICAL = '\u{22ee}'
+    export const TRI_DOT_HORIZONTAL = '\u{22ef}'
+    export const DASHES_STACKED = '\u{254f}'
+    export const SEARCH = '\u{1f50d}'
+    export const TIMER = '\u{1f558}'
 }
 
 export function deactivate() {

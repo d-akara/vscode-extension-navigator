@@ -15,6 +15,7 @@
         "Other"
     ],
     "activationEvents": [
+        "onCommand:dakara-internal.oncommand",
         "onCommand:navigator.fixedSpaceUp",
         "onCommand:navigator.fixedSpaceDown",
         "onCommand:navigator.wordRightEnd",
@@ -25,6 +26,11 @@
     "main": "./out/src/extension",
     "contributes": {
         "commands": [
+            {
+                "command": "dakara-internal.oncommand",
+                "title": "internal use only",
+                "category": "Dakara Internal"
+            },
             {
                 "command": "navigator.fixedSpaceUp",
                 "title": "Cursor jump fixed space up",
@@ -77,6 +83,12 @@
                     "command": "navigator.view.save.matches",
                     "when": "view == navigation",
                     "group": "navigation"
+                }
+            ],
+            "commandPalette": [
+                {
+                    "command": "dakara-internal.oncommand",
+                    "when": "false"
                 }
             ]
         }

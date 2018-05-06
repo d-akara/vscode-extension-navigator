@@ -45,14 +45,16 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const matchesLabel = `${Glyph.SEARCH} Matches`
-    const treeManager = View.makeTreeViewManager(context, 'navigation', {children:[{id:'matches', label:matchesLabel, collapsibleState: vscode.TreeItemCollapsibleState.Collapsed}]});
+    const treeManager = View.makeTreeViewManager(context, 'navigation');
 
-    Application.registerCommand(context, 'navigator.view.save.matches', () => {
-        Region.matchesAsSelections(vscode.window.activeTextEditor)
-        .then(selections=> {
-            const matchesSubTree = makeMatchesSubTree(selections);
-            (treeManager.rootTreeItem.children as Array<vscode.TreeItem>).push(matchesSubTree)
+    Application.registerCommand(context, 'navigator.view.add.matches', () => {
+        Region.selectionsOrMatchesOrWordSelectionInDocument(vscode.window.activeTextEditor)
+        .then(ranges=> {
+            treeManager.removeTreeItems(treeManager.rootTreeItem, (treeItem, index) => index >= 4)
+            addMatchesSubTree(treeManager.rootTreeItem, ranges);
             treeManager.update()
+            treeManager.revealItem(treeManager.findTreeItem(treeItem => treeItem.metadata === vscode.window.activeTextEditor.selection.active.line))
+            //vscode.commands.executeCommand()
         })
     });
 }
@@ -61,23 +63,23 @@ function showLine(lineNumber:number) {
     vscode.commands.executeCommand("revealLine", {lineNumber})
 }
 
-export function makeMatchesSubTree(selections: vscode.Selection[]) {
-    const matchesNode = {
-        label: `Matches ${Glyph.TRI_DOT_HORIZONTAL} ` + vscode.window.activeTextEditor.document.getText(selections[0]),
-        children: []
-    }
+export function addMatchesSubTree(parent: View.TreeItemActionable, ranges: vscode.Range[]) {
+    const matchesNode = View.addTreeItem(parent, {
+        label: `Matches ${Glyph.TRI_DOT_HORIZONTAL} ` + vscode.window.activeTextEditor.document.getText(ranges[0]),
+        collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
+    }, (prev, next) => prev === null)
 
-    let lines = Lines.linesFromRanges(vscode.window.activeTextEditor.document, selections)
-    lines = lines.sort((l1, l2) => l1.lineNumber - l2.lineNumber)
-    matchesNode.children = lines.map(line => makeTreeItemForLine(line))
-    return matchesNode
+    Lines.linesFromRanges(vscode.window.activeTextEditor.document, ranges)
+         .sort((l1, l2) => l1.lineNumber - l2.lineNumber)
+         .forEach(line => addTreeItemForLine(matchesNode, line))
 }
 
-export function makeTreeItemForLine(line: vscode.TextLine) {
-    return {
+export function addTreeItemForLine(parent: View.TreeItemActionable, line: vscode.TextLine) {
+    View.addTreeItem(parent, {
         label:  (line.lineNumber + 1) + ` ${Glyph.TRI_DOT_VERTICAL} ` + line.text,
-        command: Application.makeCommandProxy(showLine, line.lineNumber)
-    }
+        command: Application.makeCommandProxy(showLine, line.lineNumber),
+        metadata: line.lineNumber
+    })
 }
 
 export function deactivate() {

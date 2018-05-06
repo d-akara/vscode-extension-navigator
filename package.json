@@ -52,8 +52,8 @@
                 "category": "Navigator"
             },
             {
-                "command": "navigator.view.save.matches",
-                "title": "Show current find matches in view",
+                "command": "navigator.view.add.matches",
+                "title": "Add matches",
                 "category": "Navigator View",
                 "icon": {
                     "light": "icons/light/refresh.svg",
@@ -80,7 +80,7 @@
         "menus": {
             "view/title": [
                 {
-                    "command": "navigator.view.save.matches",
+                    "command": "navigator.view.add.matches",
                     "when": "view == navigation",
                     "group": "navigation"
                 }

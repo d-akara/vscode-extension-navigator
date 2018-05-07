@@ -3,6 +3,7 @@
     "displayName": "Navigator",
     "description": "Enhanced cursor navigation and movement.",
     "version": "1.2.0",
+    "icon": "icons/navigator-icon.png",
     "repository": {
         "type": "git",
         "url": "https://github.com/dakaraphi/vscode-extension-navigator"

@@ -21,7 +21,7 @@
         "onCommand:navigator.fixedSpaceDown",
         "onCommand:navigator.wordRightEnd",
         "onCommand:navigator.wordLeftBegin",
-        "onCommand:navigator.view.save.matches",
+        "onCommand:navigator.view.matches.add",
         "onView:navigation"
     ],
     "main": "./out/src/extension",
@@ -53,13 +53,18 @@
                 "category": "Navigator"
             },
             {
-                "command": "navigator.view.add.matches",
+                "command": "navigator.view.matches.add",
                 "title": "Add matches",
                 "category": "Navigator View",
                 "icon": {
                     "light": "icons/light/refresh.svg",
                     "dark": "icons/dark/refresh.svg"
                 }
+            },
+            {
+                "command": "navigator.view.matches.remove",
+                "title": "Remove From View",
+                "category": "Navigator View"
             }
         ],
         "views": {
@@ -81,14 +86,25 @@
         "menus": {
             "view/title": [
                 {
-                    "command": "navigator.view.add.matches",
+                    "command": "navigator.view.matches.add",
                     "when": "view == navigation",
                     "group": "navigation"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "navigator.view.matches.remove",
+                    "when": "view == navigation",
+                    "group": "matches"
                 }
             ],
             "commandPalette": [
                 {
                     "command": "dakara-internal.oncommand",
+                    "when": "false"
+                },
+                {
+                    "command": "navigator.view.matches.remove",
                     "when": "false"
                 }
             ]

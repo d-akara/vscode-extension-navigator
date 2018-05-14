@@ -47,15 +47,25 @@ export function activate(context: vscode.ExtensionContext) {
     const matchesLabel = `${Glyph.SEARCH} Matches`
     const treeManager = View.makeTreeViewManager(context, 'navigation');
 
-    Application.registerCommand(context, 'navigator.view.add.matches', () => {
+    View.addTreeItem(treeManager.rootTreeItem, {label: 'Recent Edits', id: 'recent', collapsibleState: vscode.TreeItemCollapsibleState.Expanded})
+
+    Application.registerCommand(context, 'navigator.view.matches.add', () => {
         Region.selectionsOrMatchesOrWordSelectionInDocument(vscode.window.activeTextEditor)
         .then(ranges=> {
             treeManager.removeTreeItems(treeManager.rootTreeItem, (treeItem, index) => index >= 4)
             addMatchesSubTree(treeManager.rootTreeItem, ranges);
             treeManager.update()
             treeManager.revealItem(treeManager.findTreeItem(treeItem => treeItem.metadata === vscode.window.activeTextEditor.selection.active.line))
-            //vscode.commands.executeCommand()
+            // TODO 
+            // vscode.commands.executeCommand()  // need command that can give focus to the tree view
+            // https://github.com/Microsoft/vscode/issues/49311
         })
+    });
+
+    Application.registerCommand(context, 'navigator.view.matches.remove', (item: View.TreeItemActionable) => {
+        const itemIndex = item.parent.children.indexOf(item)
+        item.parent.children.splice(itemIndex, 1)
+        treeManager.update()
     });
 }
 
@@ -67,7 +77,7 @@ export function addMatchesSubTree(parent: View.TreeItemActionable, ranges: vscod
     const matchesNode = View.addTreeItem(parent, {
         label: `Matches ${Glyph.TRI_DOT_HORIZONTAL} ` + vscode.window.activeTextEditor.document.getText(ranges[0]),
         collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
-    }, (prev, next) => prev === null)
+    }, children => children.findIndex(item => item.id === 'recent') + 1) // add after recent
 
     Lines.linesFromRanges(vscode.window.activeTextEditor.document, ranges)
          .sort((l1, l2) => l1.lineNumber - l2.lineNumber)

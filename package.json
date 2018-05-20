@@ -94,7 +94,7 @@
             "view/item/context": [
                 {
                     "command": "navigator.view.matches.remove",
-                    "when": "view == navigation",
+                    "when": "view == navigation && viewItem == matches",
                     "group": "matches"
                 }
             ],
@@ -108,6 +108,23 @@
                     "when": "false"
                 }
             ]
+        },
+        "configuration": {
+            "title": "Navigator configuration",
+            "properties": {
+                "navigator.view.matches.limit": {
+                    "type": "number",
+                    "default": "10",
+                    "description": "Limit maximum number of match sections in navigator view",
+                    "scope": "window"
+                },
+                "navigator.view.recent.limit": {
+                    "type": "number",
+                    "default": "10",
+                    "description": "Limit maximum number of recent items in navigator view",
+                    "scope": "window"
+                }
+            }
         }
     },
     "scripts": {

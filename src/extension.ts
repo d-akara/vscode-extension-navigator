@@ -1,4 +1,5 @@
 'use strict';
+import * as path from 'path'
 import * as vscode from 'vscode';
 import {Region, Lines, View, Glyph, Application} from 'vscode-extension-common'
 
@@ -47,15 +48,23 @@ export function activate(context: vscode.ExtensionContext) {
     const matchesLabel = `${Glyph.SEARCH} Matches`
     const treeManager = View.makeTreeViewManager(context, 'navigation');
 
+    const config = vscode.workspace.getConfiguration("navigator.view")
+    const LIMIT_RECENT  = config.get('recent.limit')
+    const LIMIT_MATCHES = config.get('matches.limit')
+
     View.addTreeItem(treeManager.rootTreeItem, {label: 'Recent Edits', id: 'recent', collapsibleState: vscode.TreeItemCollapsibleState.Expanded})
 
     Application.registerCommand(context, 'navigator.view.matches.add', () => {
         Region.selectionsOrMatchesOrWordSelectionInDocument(vscode.window.activeTextEditor)
         .then(ranges=> {
-            treeManager.removeTreeItems(treeManager.rootTreeItem, (treeItem, index) => index >= 4)
+            let countMatches = 0;
+            treeManager.removeTreeItems(treeManager.rootTreeItem, treeItem => {
+               if (treeItem.contextValue === 'matches') countMatches++
+               return countMatches >= LIMIT_MATCHES
+            })
             addMatchesSubTree(treeManager.rootTreeItem, ranges);
             treeManager.update()
-            treeManager.revealItem(treeManager.findTreeItem(treeItem => treeItem.metadata === vscode.window.activeTextEditor.selection.active.line))
+            treeManager.revealItem(treeManager.findTreeItem(treeItem => treeItem.metadata && treeItem.metadata.line === vscode.window.activeTextEditor.selection.active.line))
             // TODO 
             // vscode.commands.executeCommand()  // need command that can give focus to the tree view
             // https://github.com/Microsoft/vscode/issues/49311
@@ -69,27 +78,38 @@ export function activate(context: vscode.ExtensionContext) {
     });
 }
 
-function showLine(lineNumber:number) {
-    vscode.commands.executeCommand("revealLine", {lineNumber})
+async function showLine(lineReference: {document: vscode.TextDocument, line: number}) {
+    const linePosition = new vscode.Position(lineReference.line, 0);
+    const editor = await vscode.window.showTextDocument(lineReference.document, vscode.window.activeTextEditor.viewColumn, true)
+    await editor.revealRange(new vscode.Range(linePosition, linePosition), vscode.TextEditorRevealType.InCenterIfOutsideViewport)
+    View.setLineDecorators(editor, View.makeDecoratorLineAttention(), [lineReference.document.lineAt(lineReference.line)])
 }
 
 export function addMatchesSubTree(parent: View.TreeItemActionable, ranges: vscode.Range[]) {
+    const currentDocument = vscode.window.activeTextEditor.document
     const matchesNode = View.addTreeItem(parent, {
-        label: `Matches ${Glyph.TRI_DOT_HORIZONTAL} ` + vscode.window.activeTextEditor.document.getText(ranges[0]),
+        label: `Matches ${Glyph.TRI_DOT_HORIZONTAL} ` + currentDocument.getText(ranges[0]) + ` ${Glyph.DASHES_STACKED} ` + documentName(currentDocument),
         collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
+        contextValue: 'matches'
     }, children => children.findIndex(item => item.id === 'recent') + 1) // add after recent
 
-    Lines.linesFromRanges(vscode.window.activeTextEditor.document, ranges)
+    Lines.linesFromRanges(currentDocument, ranges)
          .sort((l1, l2) => l1.lineNumber - l2.lineNumber)
-         .forEach(line => addTreeItemForLine(matchesNode, line))
+         .forEach(line => addTreeItemForLine(matchesNode, currentDocument, line))
 }
 
-export function addTreeItemForLine(parent: View.TreeItemActionable, line: vscode.TextLine) {
+export function addTreeItemForLine(parent: View.TreeItemActionable, document: vscode.TextDocument, line: vscode.TextLine) {
+    const lineReference = {document, line: line.lineNumber}
     View.addTreeItem(parent, {
         label:  (line.lineNumber + 1) + ` ${Glyph.TRI_DOT_VERTICAL} ` + line.text,
-        command: Application.makeCommandProxy(showLine, line.lineNumber),
-        metadata: line.lineNumber
+        command: Application.makeCommandProxy(showLine, lineReference),
+        contextValue: 'matchline',
+        metadata: lineReference
     })
+}
+
+function documentName(document: vscode.TextDocument) {
+    return path.basename(document.fileName)
 }
 
 export function deactivate() {

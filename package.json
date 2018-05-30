@@ -1,8 +1,9 @@
 {
     "name": "dakara-navigator",
     "displayName": "Navigator",
-    "description": "Enhanced cursor navigation and movement.",
+    "description": "Enhanced Editor Navigation",
     "version": "1.2.0",
+    "icon": "icons/navigator-icon.png",
     "repository": {
         "type": "git",
         "url": "https://github.com/dakaraphi/vscode-extension-navigator"
@@ -15,16 +16,22 @@
         "Other"
     ],
     "activationEvents": [
+        "onCommand:dakara-internal.oncommand",
         "onCommand:navigator.fixedSpaceUp",
         "onCommand:navigator.fixedSpaceDown",
         "onCommand:navigator.wordRightEnd",
         "onCommand:navigator.wordLeftBegin",
-        "onCommand:navigator.view.save.matches",
+        "onCommand:navigator.view.matches.add",
         "onView:navigation"
     ],
     "main": "./out/src/extension",
     "contributes": {
         "commands": [
+            {
+                "command": "dakara-internal.oncommand",
+                "title": "internal use only",
+                "category": "Dakara Internal"
+            },
             {
                 "command": "navigator.fixedSpaceUp",
                 "title": "Cursor jump fixed space up",
@@ -46,13 +53,18 @@
                 "category": "Navigator"
             },
             {
-                "command": "navigator.view.save.matches",
-                "title": "Show current find matches in view",
+                "command": "navigator.view.matches.add",
+                "title": "Add Matches",
                 "category": "Navigator View",
                 "icon": {
                     "light": "icons/light/refresh.svg",
                     "dark": "icons/dark/refresh.svg"
                 }
+            },
+            {
+                "command": "navigator.view.matches.remove",
+                "title": "Remove From View",
+                "category": "Navigator View"
             }
         ],
         "views": {
@@ -72,13 +84,46 @@
             ]
         },
         "menus": {
-            "view/title": [
+            "view/item/context": [
                 {
-                    "command": "navigator.view.save.matches",
-                    "when": "view == navigation",
-                    "group": "navigation"
+                    "command": "navigator.view.matches.remove",
+                    "when": "view == navigation && viewItem == matches",
+                    "group": "matches"
+                }
+            ],
+            "commandPalette": [
+                {
+                    "command": "dakara-internal.oncommand",
+                    "when": "false"
+                },
+                {
+                    "command": "navigator.view.matches.remove",
+                    "when": "false"
                 }
             ]
+        },
+        "configuration": {
+            "title": "Navigator configuration",
+            "properties": {
+                "navigator.view.matches.limit": {
+                    "type": "number",
+                    "default": "10",
+                    "description": "Limit maximum number of match sections in navigator view",
+                    "scope": "window"
+                },
+                "navigator.view.recent.limit": {
+                    "type": "number",
+                    "default": "10",
+                    "description": "Limit maximum number of recent items in navigator view",
+                    "scope": "window"
+                },
+                "navigator.view.recent.range": {
+                    "type": "number",
+                    "default": "10",
+                    "description": "Number of lines before and after to be considered the same edit location",
+                    "scope": "window"
+                }
+            }
         }
     },
     "scripts": {

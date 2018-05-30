@@ -81,7 +81,7 @@ function adjustMarkersBasedOnEdits(treeManager: View.ITreeViewManager, changeEve
     for (const edit of changeEvent.editChanges) {
         if (edit.linesDeltaCount === 0) continue // no changes. skip to next
         treeManager.forEachTreeItem((treeItem: LineItem) => {
-            if (treeItem.contextValue !== 'matchline') return
+            if (treeItem.contextValue !== 'matchline' && treeItem.contextValue !== 'recentline') return
             if (changeEvent.document !== treeItem.metadata.document) return
             if (edit.linesStart > treeItem.metadata.line) return
             if (edit.linesStart === treeItem.metadata.line && edit.charStart > treeItem.metadata.firstVisibleChar) return
@@ -115,7 +115,7 @@ export function addMatchesSubTree(parent: View.TreeItemActionable, ranges: vscod
 
     Lines.linesFromRanges(currentDocument, ranges)
          .sort((l1, l2) => l1.lineNumber - l2.lineNumber)
-         .forEach(line => addTreeItemForLine(matchesNode, currentDocument, line))
+         .forEach(line => addTreeItemForLine(matchesNode, currentDocument, line, 'matchline'))
 }
 
 function addRecentsSubTree(parent: View.TreeItemActionable, ranges: vscode.Range[]) {
@@ -137,7 +137,7 @@ function setLevelsSubTree(parent: View.TreeItemActionable) {
     // add items for each parent level
     // TODO - need separate context value for these line references
     linesByLevel.sort((l1, l2) => l1.lineNumber - l2.lineNumber)
-                .forEach(line => addTreeItemForLine(parent, currentDocument, line))
+                .forEach(line => addTreeItemForLine(parent, currentDocument, line, 'levelline'))
 }
 
 type LineReference = {document: vscode.TextDocument, line: number, text: string, firstVisibleChar: number}
@@ -146,19 +146,19 @@ interface LineItem extends View.TreeItemActionable {
 }
 
 function addTreeItemForRecentEdit(parent: View.TreeItemActionable, document: vscode.TextDocument, line: vscode.TextLine) {
-    makeTreeLineItem(parent, document, line, 0, (item: LineItem) => documentName(item.metadata.document)+ ` ${Glyph.TRI_DOT_VERTICAL} ` + (item.metadata.line + 1) + ` ${Glyph.TRI_DOT_VERTICAL} ` + item.metadata.text)
+    makeTreeLineItem(parent, document, line, 0, 'recentline', (item: LineItem) => documentName(item.metadata.document)+ ` ${Glyph.TRI_DOT_VERTICAL} ` + (item.metadata.line + 1) + ` ${Glyph.TRI_DOT_VERTICAL} ` + item.metadata.text)
 }
 
-function addTreeItemForLine(parent: View.TreeItemActionable, document: vscode.TextDocument, line: vscode.TextLine) {
-    makeTreeLineItem(parent, document, line, -1, (item: LineItem) => (item.metadata.line + 1) + ` ${Glyph.TRI_DOT_VERTICAL} ` + item.metadata.text )
+function addTreeItemForLine(parent: View.TreeItemActionable, document: vscode.TextDocument, line: vscode.TextLine, contextValue: string) {
+    makeTreeLineItem(parent, document, line, -1, contextValue, (item: LineItem) => (item.metadata.line + 1) + ` ${Glyph.TRI_DOT_VERTICAL} ` + item.metadata.text )
 }
 
-function makeTreeLineItem(parent: View.TreeItemActionable, document: vscode.TextDocument, line: vscode.TextLine, position:number, labelResolver: (item: LineItem) => string) {
+function makeTreeLineItem(parent: View.TreeItemActionable, document: vscode.TextDocument, line: vscode.TextLine, position:number, contextValue, labelResolver: (item: LineItem) => string) {
     const lineReference:LineReference = {document, line: line.lineNumber, text: line.text, firstVisibleChar: line.firstNonWhitespaceCharacterIndex}
     View.addTreeItem(parent, {
         labelResolver:  labelResolver,
         command: Application.makeCommandProxy(showLine, lineReference),
-        contextValue: 'matchline',
+        contextValue,
         metadata: lineReference
     }, position)  
 }

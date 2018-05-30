@@ -1,7 +1,7 @@
 {
     "name": "dakara-navigator",
     "displayName": "Navigator",
-    "description": "Enhanced cursor navigation and movement.",
+    "description": "Enhanced Editor Navigation",
     "version": "1.2.0",
     "icon": "icons/navigator-icon.png",
     "repository": {
@@ -54,7 +54,7 @@
             },
             {
                 "command": "navigator.view.matches.add",
-                "title": "Add matches",
+                "title": "Add Matches",
                 "category": "Navigator View",
                 "icon": {
                     "light": "icons/light/refresh.svg",
@@ -84,13 +84,6 @@
             ]
         },
         "menus": {
-            "view/title": [
-                {
-                    "command": "navigator.view.matches.add",
-                    "when": "view == navigation",
-                    "group": "navigation"
-                }
-            ],
             "view/item/context": [
                 {
                     "command": "navigator.view.matches.remove",
@@ -122,6 +115,12 @@
                     "type": "number",
                     "default": "10",
                     "description": "Limit maximum number of recent items in navigator view",
+                    "scope": "window"
+                },
+                "navigator.view.recent.range": {
+                    "type": "number",
+                    "default": "10",
+                    "description": "Number of lines before and after to be considered the same edit location",
                     "scope": "window"
                 }
             }

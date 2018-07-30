@@ -6,14 +6,15 @@ import {Region, Lines, View, Glyph, Application} from 'vscode-extension-common'
 
 /**
  * Future Features
- * - support custom tree views / palette lists
- * - recent edit locations in tree view
- * - all find matches/highlights in tree view
- * - all matching word under cursor
- * - all parent lines of current / generic hierarchy view
+ * 
+ * - activate on startup so that recent edits will be populated when first open
+ * - regex matches with 2 inputs, 1) regex filter for lines 2) regex filter for text to display in tree view
+ * - add palette quick pick lists for sections in tree views
+ * 
  * - add marker for specific line, optional with comment.  Apply comment as end of line decorator
  * - Watch For... active or dynamic markers matching a string/regex
  * - view of all markers of current document only.  ungrouped.
+ * 
  * - custom highlighting
  *   - duplicate lines or possibly show in palette and you can jump to them?
  * 

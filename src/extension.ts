@@ -2,6 +2,7 @@
 import * as path from 'path'
 import * as vscode from 'vscode';
 import * as navigator from './navigator/navigator'
+import * as colorizer from './navigator/colorizer-plaintext'
 import {Region, Lines, View, Glyph, Application} from 'vscode-extension-common'
 
 /**
@@ -51,8 +52,14 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.commands.executeCommand("cursorWordLeft");
     });
 
+    Application.registerCommand(context, 'navigator.search.currentFile', () => {
+        navigator.searchInCurrentFile()
+    });
+
     // register the navigator tree view
     navigator.register(context)
+
+    colorizer.activate(context)
 }
 
 export function deactivate() {

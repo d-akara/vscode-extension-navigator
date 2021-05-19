@@ -124,6 +124,18 @@
                     "default": "10",
                     "description": "Number of lines before and after to be considered the same edit location",
                     "scope": "window"
+                },
+                "navigator.colorizer.enabled": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable colorizer for plaintext files",
+                    "scope": "window"
+                },
+                "navigator.colorizer.baseColor": {
+                    "type": "number",
+                    "default": "#c4783a",
+                    "description": "Base color for plaintext colorization",
+                    "scope": "window"
                 }
             }
         }
@@ -141,6 +153,7 @@
         "vscode": "^1.1.37"
     },
     "dependencies": {
-        "vscode-extension-common": "file:../vscode-extension-common"
+        "vscode-extension-common": "file:../vscode-extension-common",
+        "chroma-js": "^2.1.1"
     }
 }

@@ -1,30 +1,25 @@
 import * as vscode from 'vscode';
+import * as chroma from 'chroma-js'
 import { Region, Lines, View, Glyph, Application } from 'vscode-extension-common'
 
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext, config) {
     let activeEditor = vscode.window.activeTextEditor;
-    // Create a decorator types that we use to decorate indent levels
     let decorationTypes = [];
 
-    // Colors will cycle through, and can be any size that you want
-    const colors = vscode.workspace.getConfiguration('indentRainbow')['colors'] || [
-        "rgba(255,255,64)",
-        "rgba(127,255,127)",
-        "rgba(255,127,255)",
-        "rgba(79,236,236)"
-    ];
+    const baseColor = chroma(config.baseColor)
+    const colors = [
+        baseColor.hex(),
+        baseColor.darken().hex(),
+        baseColor.desaturate().hex(),
+        baseColor.desaturate().darken().hex(),
+    ]
 
-    // Loops through colors and creates decoration types for each one
     colors.forEach((color, index) => {
         decorationTypes[index] = vscode.window.createTextEditorDecorationType({
             isWholeLine: true,
             color: color
         });
     });
-
-    // if (activeEditor && isPlainText()) {
-    //     triggerUpdateDecorations();
-    // }
 
     vscode.window.onDidChangeActiveTextEditor(editor => {
         if (!editor) return
@@ -34,53 +29,41 @@ export function activate(context: vscode.ExtensionContext) {
         triggerUpdateDecorations();
     }, null, context.subscriptions);
 
-    vscode.workspace.onDidChangeTextDocument(event => {
-        if (!isPlainText()) return
+    vscode.window.onDidChangeTextEditorVisibleRanges(event => {
+        if (!activeEditor || !isPlainText()) return
 
-        const visibleChanges = Region.contentChangesInVisibleRanges(event.contentChanges, activeEditor.visibleRanges)
-        if (visibleChanges.length > 0) {
-            triggerUpdateDecorations(visibleChanges);
-        }
-    }, null, context.subscriptions);
-
-    // vscode.window.onDidChangeTextEditorVisibleRanges(event => {
-    //     if (!activeEditor || !isPlainText()) return
-
-    //     if (event.visibleRanges.length > 0) {
-    //         triggerUpdateDecorations();
-    //     }       
-    // }, null, context.subscriptions)
+        if (event.visibleRanges.length > 0) {
+            triggerUpdateDecorations();
+        }       
+    }, null, context.subscriptions)
 
     function isPlainText() {return activeEditor.document.languageId === 'plaintext'}
 
     let timeout = null;
     function triggerUpdateDecorations(contentChanges?: readonly vscode.TextDocumentContentChangeEvent[]) {
+        // TODO - possibly trigger a secondary update later to expand decorators slightly
+        // outside viewable area to make scrolling a little nicer
+
         if (timeout) {clearTimeout(timeout)}
 
         timeout = setTimeout(()=> {
             timeout = null;
-            updateDecorations(activeEditor, decorationTypes, contentChanges)
+            updateDecorations(activeEditor, decorationTypes)
         }, 100);
     }
 }
 
-function updateDecorations(activeEditor:vscode.TextEditor, decorationTypes:vscode.TextEditorDecorationType[], contentChanges: readonly vscode.TextDocumentContentChangeEvent[] = []) {
+function updateDecorations(activeEditor:vscode.TextEditor, decorationTypes:vscode.TextEditorDecorationType[]) {
     if (!activeEditor) {return}
 
-    let decorators = [];
+    const decorators:vscode.DecorationOptions[][] = []
+
     decorationTypes.forEach(() => {
         let decorator: vscode.DecorationOptions[] = [];
         decorators.push(decorator);
     });
 
-    let linesToDecorate
-    if (contentChanges.length === 0) {
-        // no specified content changes, so we update all lines in view
-        linesToDecorate = Lines.lineNumbersFromRanges(activeEditor.visibleRanges)
-    } else {
-        linesToDecorate = Lines.linesChanged(contentChanges);
-    }
-
+    const linesToDecorate = Lines.lineNumbersFromRanges(activeEditor.visibleRanges)
     linesToDecorate.forEach(line => {
         const level = Lines.calculateLineTabSpacing(activeEditor, line)
         addDecorator(activeEditor, line, decorators, level, decorationTypes);

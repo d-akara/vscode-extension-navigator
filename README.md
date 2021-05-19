@@ -4,6 +4,9 @@ An extension focusing on improving general editor experience especially in the a
 
 
 ## Provided Features
+- Plain Text Colorizer
+  - Indentation level colorizer for plain text files
+  - Operates only on the visible area so that performance remains constant for large files
 - Navigator View
   - use command `Add Matches` to add a new match group to the view
     - the match group will contain all `find matches` 

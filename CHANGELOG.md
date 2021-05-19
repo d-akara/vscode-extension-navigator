@@ -1,3 +1,7 @@
+## 1.3.0
+- Plain text colorizer
+  - Indentation level colorizer for plain text files
+
 ## 1.2.0
 - Enhanced Matches Tree View
   - Multiple match groups can now be set

@@ -52,14 +52,12 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.commands.executeCommand("cursorWordLeft");
     });
 
-    Application.registerCommand(context, 'navigator.search.currentFile', () => {
-        navigator.searchInCurrentFile()
-    });
-
     // register the navigator tree view
     navigator.register(context)
 
-    colorizer.activate(context)
+    const colorizerConfig = vscode.workspace.getConfiguration('navigator.colorizer')
+    if (colorizerConfig.enabled)
+        colorizer.activate(context, colorizerConfig)
 }
 
 export function deactivate() {

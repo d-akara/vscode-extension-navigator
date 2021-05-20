@@ -1,3 +1,12 @@
+## 1.4.0
+- Plain text colorizer
+  - Performance
+    - slightly increased view range update size to make uncolorized text less frequent on scrolling
+  - Enhanced customizations
+    - define custom gradients (scales)
+    - specify gamma adjustment
+    - specify interpolation mode
+    - specify brightness adjustment
 ## 1.3.0
 - Plain text colorizer
   - Indentation level colorizer for plain text files

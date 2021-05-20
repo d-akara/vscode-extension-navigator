@@ -6,13 +6,8 @@ export function activate(context: vscode.ExtensionContext, config) {
     let activeEditor = vscode.window.activeTextEditor;
     let decorationTypes = [];
 
-    const baseColor = chroma(config.baseColor)
-    const colors = [
-        baseColor.hex(),
-        baseColor.darken().hex(),
-        baseColor.desaturate().hex(),
-        baseColor.desaturate().darken().hex(),
-    ]
+    const colors = chroma.scale(config.scale).mode(config.colorMode).gamma(config.gamma).colors(config.maxColors)
+                         .map(color => chroma(color).brighten(config.brightness).hex())
 
     colors.forEach((color, index) => {
         decorationTypes[index] = vscode.window.createTextEditorDecorationType({
@@ -57,14 +52,13 @@ function updateDecorations(activeEditor:vscode.TextEditor, decorationTypes:vscod
     if (!activeEditor) {return}
 
     const decorators:vscode.DecorationOptions[][] = []
-
     decorationTypes.forEach(() => {
         let decorator: vscode.DecorationOptions[] = [];
         decorators.push(decorator);
     });
 
-    const linesToDecorate = Lines.lineNumbersFromRanges(activeEditor.visibleRanges)
-    linesToDecorate.forEach(line => {
+    const regionToUpdate = Region.makeExpandedVisibleRange(activeEditor, 50)
+    Lines.forEachLineNumberOfRange(regionToUpdate, line => {
         const level = Lines.calculateLineTabSpacing(activeEditor, line)
         addDecorator(activeEditor, line, decorators, level, decorationTypes);
     })

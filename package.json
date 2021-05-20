@@ -131,10 +131,35 @@
                     "description": "Enable colorizer for plaintext files",
                     "scope": "window"
                 },
-                "navigator.colorizer.baseColor": {
+                "navigator.colorizer.scale": {
+                    "type": "array",
+                    "default": ["#c4783a", "#c4a03a"],
+                    "description": "Array of colors for the scale or gradient",
+                    "scope": "window"
+                },
+                "navigator.colorizer.maxColors": {
                     "type": "number",
-                    "default": "#c4783a",
-                    "description": "Base color for plaintext colorization",
+                    "default": 3,
+                    "description": "The number of color variations to derive from the color scale",
+                    "scope": "window"
+                },
+                "navigator.colorizer.gamma": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Shift color scale left(<1) or right(>1)",
+                    "scope": "window"
+                },
+                "navigator.colorizer.brightness": {
+                    "type": "number",
+                    "default": 0,
+                    "description": "Shift color brightness darker(<0) or brighter(>0)",
+                    "scope": "window"
+                },
+                "navigator.colorizer.colorMode": {
+                    "type": "string",
+                    "default": "lab",
+                    "enum": ["rgb", "lrgb", "hsl", "lab", "lch"],
+                    "description": "The color scale interpolation mode",
                     "scope": "window"
                 }
             }

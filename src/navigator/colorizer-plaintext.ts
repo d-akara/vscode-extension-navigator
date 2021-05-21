@@ -36,9 +36,6 @@ export function activate(context: vscode.ExtensionContext, config) {
 
     let timeout = null;
     function triggerUpdateDecorations(contentChanges?: readonly vscode.TextDocumentContentChangeEvent[]) {
-        // TODO - possibly trigger a secondary update later to expand decorators slightly
-        // outside viewable area to make scrolling a little nicer
-
         if (timeout) {clearTimeout(timeout)}
 
         timeout = setTimeout(()=> {

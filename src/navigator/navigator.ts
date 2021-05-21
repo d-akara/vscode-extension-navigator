@@ -146,17 +146,26 @@ interface LineItem extends View.TreeItemActionable {
 }
 
 function addTreeItemForRecentEdit(parent: View.TreeItemActionable, document: vscode.TextDocument, line: vscode.TextLine) {
-    makeTreeLineItem(parent, document, line, 0, 'recentline', (item: LineItem) => documentName(item.metadata.document)+ ` ${Glyph.TRI_DOT_VERTICAL} ` + (item.metadata.line + 1) + ` ${Glyph.TRI_DOT_VERTICAL} ` + item.metadata.text)
+    const labelResolver:View.TreeItemUpdateRender = item => {
+        const builder = View.makeLabelHighlightBuilder()
+        item.label = builder.t(documentName(item.metadata.document)).t(` ${Glyph.TRI_DOT_VERTICAL} ` + (item.metadata.line + 1) + ` ${Glyph.TRI_DOT_VERTICAL} `).label()
+        item.description = item.metadata.text
+    }
+    makeTreeLineItem(parent, document, line, 0, 'recentline', labelResolver)
 }
 
 function addTreeItemForLine(parent: View.TreeItemActionable, document: vscode.TextDocument, line: vscode.TextLine, contextValue: string) {
-    makeTreeLineItem(parent, document, line, -1, contextValue, (item: LineItem) => (item.metadata.line + 1) + ` ${Glyph.TRI_DOT_VERTICAL} ` + item.metadata.text )
+    const labelResolver =  (item: LineItem) => {
+        item.label = (item.metadata.line + 1) + ` ${Glyph.TRI_DOT_VERTICAL} `
+        item.description = item.metadata.text 
+    }
+    makeTreeLineItem(parent, document, line, -1, contextValue, labelResolver)
 }
 
-function makeTreeLineItem(parent: View.TreeItemActionable, document: vscode.TextDocument, line: vscode.TextLine, position:number, contextValue, labelResolver: (item: LineItem) => string) {
-    const lineReference:LineReference = {document, line: line.lineNumber, text: line.text, firstVisibleChar: line.firstNonWhitespaceCharacterIndex}
+function makeTreeLineItem(parent: View.TreeItemActionable, document: vscode.TextDocument, line: vscode.TextLine, position:number, contextValue, labelResolver: View.TreeItemUpdateRender) {
+    const lineReference:LineReference = {document, line: line.lineNumber, text: line.text.trim(), firstVisibleChar: line.firstNonWhitespaceCharacterIndex}
     View.addTreeItem(parent, {
-        labelResolver:  labelResolver,
+        updateRender:  labelResolver,
         command: Application.makeCommandProxy(showLine, lineReference),
         contextValue,
         metadata: lineReference

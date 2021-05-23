@@ -2,7 +2,7 @@
     "name": "dakara-navigator",
     "displayName": "Navigator",
     "description": "Enhanced Editor Navigation",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "icon": "icons/navigator-icon.png",
     "repository": {
         "type": "git",
@@ -63,9 +63,10 @@
                 }
             },
             {
-                "command": "navigator.view.matches.remove",
+                "command": "navigator.view.removeItem",
                 "title": "Remove From View",
-                "category": "Navigator View"
+                "category": "Navigator View",
+                "icon":  "icons/clear.svg"
             }
         ],
         "views": {
@@ -81,16 +82,16 @@
                 {
                     "id": "navigator",
                     "title": "Navigator",
-                    "icon": "icons/view-bar.svg"
+                    "icon": "icons/view-bar.png"
                 }
             ]
         },
         "menus": {
             "view/item/context": [
                 {
-                    "command": "navigator.view.matches.remove",
-                    "when": "view == navigation && viewItem == matches",
-                    "group": "matches"
+                    "command": "navigator.view.removeItem",
+                    "when": "view == navigation && viewItem == matches || view == navigation && viewItem == matchline || view == navigation && viewItem == recentline",
+                    "group": "inline"
                 }
             ],
             "commandPalette": [
@@ -99,7 +100,7 @@
                     "when": "false"
                 },
                 {
-                    "command": "navigator.view.matches.remove",
+                    "command": "navigator.view.removeItem",
                     "when": "false"
                 }
             ]

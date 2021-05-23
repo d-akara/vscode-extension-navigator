@@ -7,6 +7,10 @@
     - specify gamma adjustment
     - specify interpolation mode
     - specify brightness adjustment
+- Improvements in navigator tree view
+  - Improved clarity of text using the tree item description field which displays in slighly different color
+  - Added action icon to all tree items to remove from view
+  
 ## 1.3.0
 - Plain text colorizer
   - Indentation level colorizer for plain text files

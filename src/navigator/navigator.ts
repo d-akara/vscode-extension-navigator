@@ -34,7 +34,7 @@ export function register(context: vscode.ExtensionContext) {
         // https://github.com/Microsoft/vscode/issues/49311
     }
 
-    Application.registerCommand(context, 'navigator.view.matches.remove', (item: View.TreeItemActionable) => {
+    Application.registerCommand(context, 'navigator.view.removeItem', (item: View.TreeItemActionable) => {
         const itemIndex = item.parent.children.indexOf(item)
         item.parent.children.splice(itemIndex, 1)
         treeManager.update()

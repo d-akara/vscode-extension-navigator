@@ -1,5 +1,7 @@
 # Navigator
 
+![ScreenShot](doc-images/github-banner.png)
+
 An extension focusing on improving general editor experience especially in the areas of navigating code.
 
 

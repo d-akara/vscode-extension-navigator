@@ -1,3 +1,9 @@
+## 1.5.0
+- Plain text colorizer
+  - Performance
+- Improvements in navigator tree view
+  - 
+
 ## 1.4.0
 - Plain text colorizer
   - Performance

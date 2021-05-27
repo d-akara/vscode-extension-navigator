@@ -3,7 +3,7 @@ import * as path from 'path'
 import * as vscode from 'vscode';
 import * as navigator from './navigator/navigator'
 import * as colorizer from './navigator/colorizer-plaintext'
-import {Region, Lines, View, Glyph, Application} from 'vscode-extension-common'
+import {Region, Lines, View, Glyph, Application, Disposable} from 'vscode-extension-common'
 
 /**
  * Future Features
@@ -22,6 +22,7 @@ import {Region, Lines, View, Glyph, Application} from 'vscode-extension-common'
  */
 
 export function activate(context: vscode.ExtensionContext) {
+    let colorizerDisposable:Disposable
     View.registerIcons(context, 'icons')
 
     Application.registerInternalCommandProxy(context)
@@ -57,7 +58,17 @@ export function activate(context: vscode.ExtensionContext) {
 
     const colorizerConfig = vscode.workspace.getConfiguration('navigator.colorizer')
     if (colorizerConfig.enabled)
-        colorizer.activate(context, colorizerConfig)
+        colorizerDisposable = colorizer.activate(context, colorizerConfig)
+    
+    vscode.workspace.onDidChangeConfiguration(event => {
+    
+        if (event.affectsConfiguration('navigator.colorizer')) {
+            colorizerDisposable.dispose()
+            const colorizerConfig = vscode.workspace.getConfiguration('navigator.colorizer')
+            if (colorizerConfig.enabled)
+            colorizerDisposable = colorizer.activate(context, colorizerConfig)
+        }
+    }, context.subscriptions)
 }
 
 export function deactivate() {

@@ -57,10 +57,7 @@
                 "command": "navigator.view.matches.add",
                 "title": "Add Matches",
                 "category": "Navigator View",
-                "icon": {
-                    "light": "icons/light/refresh.svg",
-                    "dark": "icons/dark/refresh.svg"
-                }
+                "icon": "icons/add-matches.svg"
             },
             {
                 "command": "navigator.view.removeItem",
@@ -73,7 +70,7 @@
             "navigator": [
                 {
                     "id": "navigation",
-                    "name": "Navigator"
+                    "name": "Explorer"
                 }
             ]
         },
@@ -81,12 +78,19 @@
             "activitybar": [
                 {
                     "id": "navigator",
-                    "title": "Navigator",
+                    "title": "Navigator Explorer",
                     "icon": "icons/view-bar.png"
                 }
             ]
         },
         "menus": {
+            "view/title": [
+                {
+                    "command": "navigator.view.matches.add",
+                    "when": "view == navigation",
+                    "group": "navigation"
+                }
+            ],
             "view/item/context": [
                 {
                     "command": "navigator.view.removeItem",
@@ -130,6 +134,13 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Enable colorizer for plaintext files",
+                    "scope": "window"
+                },
+                "navigator.colorizer.colorMethod": {
+                    "type": "string",
+                    "default": "indentation",
+                    "enum": ["indentation", "row"],
+                    "description": "Select color for line by indentation level or row number",
                     "scope": "window"
                 },
                 "navigator.colorizer.scale": {

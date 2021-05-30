@@ -4,29 +4,29 @@ import * as vscode from 'vscode';
 import {Region, Lines, View, Glyph, Application} from 'vscode-extension-common'
 
 export function register(context: vscode.ExtensionContext) {
-    const matchesLabel = `${Glyph.SEARCH} Matches`
-    const treeManager = View.makeTreeViewManager(context, 'navigation');
-
     const config = vscode.workspace.getConfiguration("navigator.view")
     const LIMIT_RECENT       = config.get('recent.limit')
     const LIMIT_MATCHES      = config.get('matches.limit')
     const RECENT_EDIT_RANGE  = config.get('recent.range') as number
-
+    
+    const treeManager = View.makeTreeViewManager(context, 'navigation');
     const levelsRoot = View.addTreeItem(treeManager.rootTreeItem, {label: 'Line Levels',  id: 'levels', collapsibleState: vscode.TreeItemCollapsibleState.Expanded})
     const recentRoot = View.addTreeItem(treeManager.rootTreeItem, {label: 'Recent Edits', id: 'recent', collapsibleState: vscode.TreeItemCollapsibleState.Expanded})
 
-    Application.registerCommand(context, 'navigator.view.matches.add', () => {
-        Region.selectionsOrMatchesOrWordSelectionInDocument(vscode.window.activeTextEditor)
-              .then(addMatchesSectionToTree)
+    Application.registerCommand(context, 'navigator.view.matches.add', async () => {
+        const ranges = await Region.selectionsOrMatchesOrWordSelectionInDocument(vscode.window.activeTextEditor)
+        const currentDocument = vscode.window.activeTextEditor.document
+        const sectionSubTitle = currentDocument.getText(ranges[0])
+        addBookmarksSectionToTree(currentDocument, ranges, sectionSubTitle)
     });
 
-    function addMatchesSectionToTree(ranges: vscode.Range[]) {
+    function addBookmarksSectionToTree(document: vscode.TextDocument, ranges: vscode.Range[], sectionSubTitle: string) {
         let countMatches = 0;
         treeManager.removeTreeItems(treeManager.rootTreeItem, treeItem => {
            if (treeItem.contextValue === 'matches') countMatches++
            return countMatches >= LIMIT_MATCHES
         })
-        addMatchesSubTree(treeManager.rootTreeItem, ranges);
+        addMatchesSubTree(document, treeManager.rootTreeItem, ranges, sectionSubTitle);
         treeManager.update()
         treeManager.revealItem(treeManager.findTreeItem(treeItem => treeItem.contextValue === 'matchline' && treeItem.metadata && treeItem.metadata.line === vscode.window.activeTextEditor.selection.active.line))
         // TODO 
@@ -105,10 +105,9 @@ async function showLine(lineReference: LineReference) {
     View.setLineDecorators(editor, View.makeDecoratorLineAttention(), [lineReference.document.lineAt(lineReference.line)])
 }
 
-export function addMatchesSubTree(parent: View.TreeItemActionable, ranges: vscode.Range[]) {
-    const currentDocument = vscode.window.activeTextEditor.document
+export function addMatchesSubTree(currentDocument:vscode.TextDocument, parent: View.TreeItemActionable, ranges: vscode.Range[], sectionSubTitle: string) {
     const matchesNode = View.addTreeItem(parent, {
-        label: `Matches ${Glyph.TRI_DOT_HORIZONTAL} ` + documentName(currentDocument) + ` ${Glyph.TRI_DOT} ` + currentDocument.getText(ranges[0]),
+        label: `Bookmarks ${Glyph.TRI_DOT_HORIZONTAL} ` + documentName(currentDocument) + ` ${Glyph.TRI_DOT} ` + sectionSubTitle,
         collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
         contextValue: 'matches'
     }, children => children.findIndex(item => item.id === 'recent') + 1) // add after recent

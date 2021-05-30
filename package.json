@@ -55,9 +55,9 @@
             },
             {
                 "command": "navigator.view.matches.add",
-                "title": "Add Matches",
+                "title": "Add Bookmarks",
                 "category": "Navigator View",
-                "icon": "icons/add-matches.svg"
+                "icon": "icons/add-bookmarks.svg"
             },
             {
                 "command": "navigator.view.removeItem",
@@ -115,7 +115,7 @@
                 "navigator.view.matches.limit": {
                     "type": "number",
                     "default": "10",
-                    "description": "Limit maximum number of match sections in navigator view",
+                    "description": "Limit maximum number of bookmark sections in navigator view",
                     "scope": "window"
                 },
                 "navigator.view.recent.limit": {

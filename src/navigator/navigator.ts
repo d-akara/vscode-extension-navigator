@@ -17,7 +17,18 @@ export function register(context: vscode.ExtensionContext) {
         const ranges = await Region.selectionsOrMatchesOrWordSelectionInDocument(vscode.window.activeTextEditor)
         const currentDocument = vscode.window.activeTextEditor.document
         const sectionSubTitle = currentDocument.getText(ranges[0])
+
+        if (sectionSubTitle.length === 0) {
+            vscode.window.showInformationMessage("No text selected or text under cursor")
+            return
+        }
+
         addBookmarksSectionToTree(currentDocument, ranges, sectionSubTitle)
+    });
+
+    Application.registerCommand(context, 'navigator.view.removeItem', (item: View.TreeItemActionable) => {
+        treeManager.removeTreeItem(item)
+        treeManager.update()
     });
 
     function addBookmarksSectionToTree(document: vscode.TextDocument, ranges: vscode.Range[], sectionSubTitle: string) {
@@ -33,12 +44,6 @@ export function register(context: vscode.ExtensionContext) {
         // vscode.commands.executeCommand()  // need command that can give focus to the tree view
         // https://github.com/Microsoft/vscode/issues/49311
     }
-
-    Application.registerCommand(context, 'navigator.view.removeItem', (item: View.TreeItemActionable) => {
-        const itemIndex = item.parent.children.indexOf(item)
-        item.parent.children.splice(itemIndex, 1)
-        treeManager.update()
-    });
 
     vscode.window.onDidChangeTextEditorSelection(event=> {
         // clear decorators if we click in the editor
@@ -72,17 +77,13 @@ export function register(context: vscode.ExtensionContext) {
     })
 }
 
-interface TreeItemCodeLine extends View.TreeItemActionable {
-    metadata: {document: vscode.TextDocument, line: number}
-}
-
 function adjustMarkersBasedOnEdits(treeManager: View.ITreeViewManager, changeEvent: View.DocumentWatchEvent): boolean {
     let madeChanges = false
     for (const edit of changeEvent.editChanges) {
         if (edit.linesDeltaCount === 0) continue // no changes. skip to next
         treeManager.forEachTreeItem((treeItem: LineItem) => {
             if (treeItem.contextValue !== 'matchline' && treeItem.contextValue !== 'recentline') return
-            if (changeEvent.document !== treeItem.metadata.document) return
+            if (changeEvent.document.uri !== treeItem.metadata.documentUri) return
             if (edit.linesStart > treeItem.metadata.line) return
             if (edit.linesStart === treeItem.metadata.line && edit.charStart > treeItem.metadata.firstVisibleChar) return
             treeItem.metadata.line += edit.linesDeltaCount
@@ -100,9 +101,10 @@ function isWithinRecentRangeButNotSameLine(recents: View.TreeItemActionable[], d
 
 async function showLine(lineReference: LineReference) {
     const linePosition = new vscode.Position(lineReference.line, 0);
-    const editor = await vscode.window.showTextDocument(lineReference.document, vscode.window.activeTextEditor.viewColumn, true)
+    const document = await vscode.workspace.openTextDocument(lineReference.documentUri)
+    const editor = await vscode.window.showTextDocument(document, vscode.window.activeTextEditor.viewColumn, true)
     await editor.revealRange(new vscode.Range(linePosition, linePosition), vscode.TextEditorRevealType.InCenterIfOutsideViewport)
-    View.setLineDecorators(editor, View.makeDecoratorLineAttention(), [lineReference.document.lineAt(lineReference.line)])
+    View.setLineDecorators(editor, View.makeDecoratorLineAttention(), [document.lineAt(lineReference.line)])
 }
 
 export function addMatchesSubTree(currentDocument:vscode.TextDocument, parent: View.TreeItemActionable, ranges: vscode.Range[], sectionSubTitle: string) {
@@ -139,7 +141,7 @@ function setLevelsSubTree(parent: View.TreeItemActionable) {
                 .forEach(line => addTreeItemForLine(parent, currentDocument, line, 'levelline'))
 }
 
-type LineReference = {document: vscode.TextDocument, line: number, text: string, firstVisibleChar: number}
+type LineReference = {documentUri: vscode.Uri, line: number, text: string, firstVisibleChar: number}
 interface LineItem extends View.TreeItemActionable {
     metadata: LineReference
 }
@@ -162,7 +164,7 @@ function addTreeItemForLine(parent: View.TreeItemActionable, document: vscode.Te
 }
 
 function makeTreeLineItem(parent: View.TreeItemActionable, document: vscode.TextDocument, line: vscode.TextLine, position:number, contextValue, labelResolver: View.TreeItemUpdateRender) {
-    const lineReference:LineReference = {document, line: line.lineNumber, text: line.text.trim(), firstVisibleChar: line.firstNonWhitespaceCharacterIndex}
+    const lineReference:LineReference = {documentUri:document.uri, line: line.lineNumber, text: line.text.trim(), firstVisibleChar: line.firstNonWhitespaceCharacterIndex}
     View.addTreeItem(parent, {
         updateRender:  labelResolver,
         command: Application.makeCommandProxy(showLine, lineReference),

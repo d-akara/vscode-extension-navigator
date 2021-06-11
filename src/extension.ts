@@ -53,6 +53,11 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.commands.executeCommand("cursorWordLeft");
     });
 
+    Application.registerCommand(context,'navigator.colorizer.toggleMode', async () => {
+        const newValue = await Application.settingsCycleNext('navigator.colorizer', 'colorMethod', ['indentation', 'row'])
+        vscode.window.showInformationMessage('Set colorizer mode: ' + newValue)
+    });
+
     // register the navigator tree view
     navigator.register(context)
 
@@ -66,7 +71,7 @@ export function activate(context: vscode.ExtensionContext) {
             colorizerDisposable.dispose()
             const colorizerConfig = vscode.workspace.getConfiguration('navigator.colorizer')
             if (colorizerConfig.enabled)
-            colorizerDisposable = colorizer.activate(context, colorizerConfig)
+                colorizerDisposable = colorizer.activate(context, colorizerConfig)
         }
     }, context.subscriptions)
 }

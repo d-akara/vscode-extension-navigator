@@ -121,7 +121,6 @@ export function addMatchesSubTree(currentDocument:vscode.TextDocument, parent: V
 
 function addRecentsSubTree(parent: View.TreeItemActionable, ranges: vscode.Range[]) {
     const currentDocument = vscode.window.activeTextEditor.document
-
     Lines.linesFromRanges(currentDocument, ranges)
          .sort((l1, l2) => l1.lineNumber - l2.lineNumber)
          .forEach(line => addTreeItemForRecentEdit(parent, currentDocument, line))
@@ -174,5 +173,5 @@ function makeTreeLineItem(parent: View.TreeItemActionable, document: vscode.Text
 }
 
 function documentName(document: vscode.TextDocument) {
-    return path.basename(document.fileName)
+    return path.basename(document?.fileName ?? 'untitled')
 }

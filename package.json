@@ -2,7 +2,7 @@
     "name": "dakara-navigator",
     "displayName": "Navigator",
     "description": "Enhanced Editor Navigation",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "icon": "icons/navigator-icon.png",
     "repository": {
         "type": "git",
@@ -64,6 +64,11 @@
                 "title": "Remove From View",
                 "category": "Navigator View",
                 "icon":  "icons/clear.svg"
+            },
+            {
+                "command": "navigator.colorizer.toggleMode",
+                "title": "Toggle colorizer mode",
+                "category": "Navigator"
             }
         ],
         "views": {
